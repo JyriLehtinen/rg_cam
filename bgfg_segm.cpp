@@ -48,6 +48,7 @@ int main(int argc, const char** argv)
     string file = parser.get<string>("file_name");
     string method = parser.get<string>("method");
     VideoCapture cap;
+	int fps;
 	Mat image;
 	VideoCapture bg_cap;
     bool update_bg_model = true;
@@ -82,13 +83,16 @@ int main(int argc, const char** argv)
         return -1;
     }
 	
-	if(!bg_cap.isOpened())
+	if(!bg_cap.isOpened() && replaceVid)
 	{
 		printf("Can not open background video\n");
 		replaceVid = false;
 	}
 
-	
+	fps = cap.get(CV_CAP_PROP_FPS);
+	cout << "Frames per second using video.get(CV_CAP_PROP_FPS) : " << fps << endl;
+ 
+//	printf("FPS = %d\n", fps);
 
     namedWindow("image", WINDOW_NORMAL);
     namedWindow("foreground mask", WINDOW_NORMAL);
@@ -98,7 +102,7 @@ int main(int argc, const char** argv)
 
     Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
             createBackgroundSubtractorKNN().dynamicCast<BackgroundSubtractor>() :
-            createBackgroundSubtractorMOG2().dynamicCast<BackgroundSubtractor>();
+            createBackgroundSubtractorMOG2(1000, 20, false).dynamicCast<BackgroundSubtractor>();
 
     Mat img0, img, fgmask, fgimg;
 	Mat image_sized;
@@ -117,7 +121,8 @@ int main(int argc, const char** argv)
           fgimg.create(img.size(), img.type());
 
         //update the model
-        bg_model->apply(img, fgmask, update_bg_model ? -1 : 0);
+        bg_model->apply(img, fgmask, update_bg_model ? 0.0008 : 0); //-1 learning rate means automatic adjustment
+
         if( smoothMask )
         {
             GaussianBlur(fgmask, fgmask, Size(11, 11), 3.5, 3.5);
@@ -161,7 +166,7 @@ int main(int argc, const char** argv)
         if(!bgimg.empty())
           imshow("mean background image", bgimg );
 
-        char k = (char)waitKey(30);
+        char k = (char)waitKey(10); //Original value is 30
         if( k == 27 ) break;
         if( k == ' ' )
         {
