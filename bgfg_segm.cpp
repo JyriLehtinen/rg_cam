@@ -102,7 +102,7 @@ int main(int argc, const char** argv)
 
     Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
             createBackgroundSubtractorKNN().dynamicCast<BackgroundSubtractor>() :
-            createBackgroundSubtractorMOG2(1000, 20, false).dynamicCast<BackgroundSubtractor>();
+            createBackgroundSubtractorMOG2(1000, 22, false).dynamicCast<BackgroundSubtractor>();
 
     Mat img0, img, fgmask, fgimg;
 	Mat image_sized;
@@ -121,7 +121,7 @@ int main(int argc, const char** argv)
           fgimg.create(img.size(), img.type());
 
         //update the model
-        bg_model->apply(img, fgmask, update_bg_model ? 0.0008 : 0); //-1 learning rate means automatic adjustment
+        bg_model->apply(img, fgmask, update_bg_model ? 0.0005 : 0); //-1 learning rate means automatic adjustment
 
         if( smoothMask )
         {
