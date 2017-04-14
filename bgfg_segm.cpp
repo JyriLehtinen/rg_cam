@@ -7,6 +7,9 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <opencv2/objdetect.hpp>
+#include <opencv2/imgcodecs.hpp>
+
 #include <stdio.h>
 
 using namespace std;
@@ -23,12 +26,13 @@ static void help()
 
 const char* keys =
 {
-    "{c  camera   |         | use camera or not}"
-    "{m  method   |mog2     | method (knn or mog2) }"
-    "{s  smooth   |         | smooth the mask }"
-    "{fn file_name|../data/tree.avi | movie file        }"
-	"{p  pic      || new background picture }"
-	"{vid bg_vid  || new background video   }"
+    "{c   camera   |         | use camera or not}"
+    "{m   method   |mog2     | method (knn or mog2) }"
+    "{s   smooth   |         | smooth the mask }"
+    "{fn  file_name|../data/tree.avi | movie file        }"
+	"{p   pic      |         | new background picture }"
+	"{vid bg_vid   |         | new background video   }"
+	"{pd  people   |         | detect people   }"
 };
 
 //this is a sample for foreground detection functions
@@ -39,9 +43,10 @@ int main(int argc, const char** argv)
     CommandLineParser parser(argc, argv, keys);
     bool useCamera = parser.has("camera");
     bool smoothMask = parser.has("smooth");
-	
 	bool replacePic = parser.has("pic");
-	bool replaceVid = parser.has("vid");
+	bool replaceVid = parser.has("bg_vid");
+	bool detectPeople = parser.has("people");
+
 	string picture = parser.get<string>("pic");
 	string bg_video = parser.get<string>("vid");
 
@@ -92,8 +97,6 @@ int main(int argc, const char** argv)
 	fps = cap.get(CV_CAP_PROP_FPS);
 	cout << "Frames per second using video.get(CV_CAP_PROP_FPS) : " << fps << endl;
  
-//	printf("FPS = %d\n", fps);
-
     namedWindow("image", WINDOW_NORMAL);
     namedWindow("foreground mask", WINDOW_NORMAL);
     namedWindow("foreground image", WINDOW_NORMAL);
@@ -105,7 +108,6 @@ int main(int argc, const char** argv)
             createBackgroundSubtractorMOG2(1000, 22, false).dynamicCast<BackgroundSubtractor>();
 
     Mat img0, img, fgmask, fgimg;
-	Mat image_sized;
 	Mat bg_img0, bg_img;
 
     for(;;)
@@ -132,11 +134,11 @@ int main(int argc, const char** argv)
 
 		if(replacePic)
 		{
-			resize(image, image_sized, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
+			resize(image, bg_img, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
 		}
 
 
-		if(replaceVid)
+		else if(replaceVid)
 		{
 			bg_cap >> bg_img0;
 			if(bg_img0.empty())
@@ -147,13 +149,9 @@ int main(int argc, const char** argv)
 			if(!bg_img0.empty())
 				resize(bg_img0, bg_img, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
 		}
-//		imshow("Picture", image_sized);
-
 
         fgimg = Scalar::all(0);
-		if(replacePic)
-			image_sized.copyTo(fgimg);
-		else if(replaceVid)
+		if(replacePic || replaceVid)
 			bg_img.copyTo(fgimg);
         img.copyTo(fgimg, fgmask);
 
