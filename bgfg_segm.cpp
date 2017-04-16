@@ -24,6 +24,50 @@ static void help()
 "			./bgfg_segm [--camera]=<use camera, if this key is present>, [--file_name]=<path to movie file> \n\n");
 }
 
+/** @function thresh_callback */
+Mat draw_contours(Mat source, int thresh)
+{
+  Mat canny_output;
+  vector<vector<Point> > contours;
+  vector<Vec4i> hierarchy;
+	
+  //Blur the image to reduce noise
+  blur( source, source, Size(2, 2) );
+  /// Detect edges using canny
+  Canny( source, canny_output, thresh, thresh*2, 3 );
+  /// Find contours
+  findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+  /// Draw contours
+  Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+  for( int i = 0; i< contours.size(); i++ )
+     {
+    	drawContours( drawing, contours, i, 0xFF, 2, 8, hierarchy, 0, Point() );
+     }
+	return drawing;
+}
+
+/*
+   	@brief: Adjust the background subtraction learning rate to weigh the beginning more.
+   			Assuming that video starts with only background in the picture
+	@param: fps, video frames per second
+	@param: count, frame counter
+	@ret: 	0 on success
+*/
+int adjust_learning(int fps, int count, double *rate)
+{
+	if((count/fps) < 8)
+	{
+		*rate = 0.0075;
+	}
+	else
+	{
+		*rate = 0.0001;
+	}
+
+	return 0;
+}
+
 const char* keys =
 {
     "{c   camera   |         | use camera or not}"
@@ -53,7 +97,11 @@ int main(int argc, const char** argv)
     string file = parser.get<string>("file_name");
     string method = parser.get<string>("method");
     VideoCapture cap;
+
+	double* rate;
 	int fps;
+	long frm_cnt = 0;
+
 	Mat image;
 	VideoCapture bg_cap;
     bool update_bg_model = true;
@@ -101,14 +149,17 @@ int main(int argc, const char** argv)
     namedWindow("foreground mask", WINDOW_NORMAL);
     namedWindow("foreground image", WINDOW_NORMAL);
 	namedWindow("mean background image", WINDOW_NORMAL);
+
+	if(detectPeople)
+		namedWindow("Contours", WINDOW_NORMAL);
 	
 
     Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
             createBackgroundSubtractorKNN().dynamicCast<BackgroundSubtractor>() :
-            createBackgroundSubtractorMOG2(1000, 22, false).dynamicCast<BackgroundSubtractor>();
+            createBackgroundSubtractorMOG2(1000, 30, false).dynamicCast<BackgroundSubtractor>();
 
     Mat img0, img, fgmask, fgimg;
-	Mat bg_img0, bg_img;
+	Mat bg_img0, bg_img, areas;
 
     for(;;)
     {
@@ -123,7 +174,8 @@ int main(int argc, const char** argv)
           fgimg.create(img.size(), img.type());
 
         //update the model
-        bg_model->apply(img, fgmask, update_bg_model ? 0.0005 : 0); //-1 learning rate means automatic adjustment
+		adjust_learning(fps, frm_cnt++, rate);
+        bg_model->apply(img, fgmask, update_bg_model ? *rate : 0); //-1 learning rate means automatic adjustment, 0.005 seemed good for the clip
 
         if( smoothMask )
         {
@@ -157,6 +209,12 @@ int main(int argc, const char** argv)
 
         Mat bgimg;
         bg_model->getBackgroundImage(bgimg);
+		
+		if(detectPeople)
+		{
+			areas = draw_contours(fgmask, 300);
+			imshow("Contours", areas);
+		}
 
         imshow("image", img);
         imshow("foreground mask", fgmask);
