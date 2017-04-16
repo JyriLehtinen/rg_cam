@@ -98,7 +98,7 @@ int main(int argc, const char** argv)
     string method = parser.get<string>("method");
     VideoCapture cap;
 
-	double* rate;
+	double* rate = (double *)malloc(sizeof(double));
 	int fps;
 	long frm_cnt = 0;
 
@@ -153,7 +153,6 @@ int main(int argc, const char** argv)
 	if(detectPeople)
 		namedWindow("Contours", WINDOW_NORMAL);
 	
-
     Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
             createBackgroundSubtractorKNN().dynamicCast<BackgroundSubtractor>() :
             createBackgroundSubtractorMOG2(1000, 30, false).dynamicCast<BackgroundSubtractor>();
@@ -234,5 +233,6 @@ int main(int argc, const char** argv)
         }
     }
 
+	free(rate);
     return 0;
 }
