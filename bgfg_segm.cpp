@@ -17,7 +17,7 @@ using namespace cv;
 /* Private defines */
 #define LEARN_TIME		7 		//How long weighed learning is running
 #define BG_HISTORY		1000	//BG subtraction algorithm history length
-#define BG_THRESH		22		//BG subtraction threshold
+#define BG_THRESH		30		//BG subtraction threshold
 
 static void help()
 {
@@ -207,8 +207,8 @@ int main(int argc, const char** argv)
 
         if( smoothMask )
         {
-            GaussianBlur(fgmask, fgmask, Size(11, 11), 3.5, 3.5);
-            threshold(fgmask, fgmask, 10, 255, THRESH_BINARY);
+            GaussianBlur(fgmask, fgmask, Size(1, 1), 3.5, 3.5);
+            threshold(fgmask, fgmask, 30, 255, THRESH_BINARY);
         }
 
 
