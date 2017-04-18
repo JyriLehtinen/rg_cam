@@ -55,7 +55,7 @@ Mat draw_contours(Mat source, int thresh)
    @param:	src_img, image source
    @retval:	output, image file where the output is written
 */
-Mat detect_blobs(Mat src_img)
+Mat draw_blobs(Mat src_img)
 {
 	Mat out_img;
 	if(src_img.empty())
@@ -115,7 +115,8 @@ int main(int argc, const char** argv)
     bool smoothMask = parser.has("smooth");
 	bool replacePic = parser.has("pic");
 	bool replaceVid = parser.has("bg_vid");
-	bool detectPeople = parser.has("people");
+	bool detectContours = parser.has("contours");
+	bool detectBlobs = parser.has("blobs");
 
 	string picture = parser.get<string>("pic");
 	string bg_video = parser.get<string>("vid");
@@ -176,15 +177,17 @@ int main(int argc, const char** argv)
     namedWindow("foreground image", WINDOW_NORMAL);
 	namedWindow("mean background image", WINDOW_NORMAL);
 
-	if(detectPeople)
+	if(detectContours)
 		namedWindow("Contours", WINDOW_NORMAL);
+	if(detectBlobs)
+		namedWindow("Blobs", WINDOW_NORMAL);
 	
     Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
             createBackgroundSubtractorKNN().dynamicCast<BackgroundSubtractor>() :
             createBackgroundSubtractorMOG2(BG_HISTORY, BG_THRESH, false).dynamicCast<BackgroundSubtractor>();
 
     Mat img0, img, fgmask, fgimg;
-	Mat bg_img0, bg_img, areas;
+	Mat bg_img0, bg_img, areas, blob_img;
 
     for(;;)
     {
@@ -235,12 +238,17 @@ int main(int argc, const char** argv)
         Mat bgimg;
         bg_model->getBackgroundImage(bgimg);
 		
-		if(detectPeople)
+		if(detectContours)
 		{
 			areas = draw_contours(fgmask, 300);
 			imshow("Contours", areas);
 		}
 
+		if(detectBlobs)
+		{
+			blob_img = draw_blobs(fgmask);
+			imshow("Contours", blob_img);
+		}
         imshow("image", img);
         imshow("foreground mask", fgmask);
         imshow("foreground image", fgimg);
