@@ -11,9 +11,13 @@
 #include <opencv2/imgcodecs.hpp>
 
 #include <stdio.h>
-//ADDED USELESS LINE!
 using namespace std;
 using namespace cv;
+
+/* Private defines */
+#define LEARN_TIME		7 		//How long weighed learning is running
+#define BG_HISTORY		1000	//BG subtraction algorithm history length
+#define BG_THRESH		22		//BG subtraction threshold
 
 static void help()
 {
@@ -54,9 +58,9 @@ Mat draw_contours(Mat source, int thresh)
 	@param: count, frame counter
 	@ret: 	0 on success
 */
-int adjust_learning(int fps, int count, double *rate)
+int adjust_learning(int fps, int count, double *rate) //TODO Add more gradual change to the learning instead of step.
 {
-	if((count/fps) < 8)
+	if((count/fps) < LEARN_TIME)
 	{
 		*rate = 0.0075;
 	}
@@ -155,7 +159,7 @@ int main(int argc, const char** argv)
 	
     Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
             createBackgroundSubtractorKNN().dynamicCast<BackgroundSubtractor>() :
-            createBackgroundSubtractorMOG2(1000, 30, false).dynamicCast<BackgroundSubtractor>();
+            createBackgroundSubtractorMOG2(BG_HISTORY, BG_THRESH, false).dynamicCast<BackgroundSubtractor>();
 
     Mat img0, img, fgmask, fgimg;
 	Mat bg_img0, bg_img, areas;
