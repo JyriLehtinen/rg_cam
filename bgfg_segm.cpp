@@ -46,7 +46,7 @@ Mat draw_contours(Mat source, int thresh)
   Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
   for( int i = 0; i< contours.size(); i++ )
      {
-    	drawContours( drawing, contours, i, 0xFF, 2, 8, hierarchy, 0, Point() );
+    	drawContours( drawing, contours, i, 0xFF, CV_FILLED, 8, hierarchy, 0, Point() ); //Orig. width 2, CV_FILLED for fill
      }
 	return drawing;
 }
@@ -55,17 +55,17 @@ Mat draw_contours(Mat source, int thresh)
    @param:	src_img, image source
    @retval:	output, image file where the output is written
 */
-Mat draw_blobs(Mat src_img)
+Mat draw_blobs(Mat src_img) //TODO Doesn't really work here
 {
 	Mat out_img;
 	if(src_img.empty())
 		return out_img;
 	//Set up a vector with default parameters TODO Find better parameters
-	SimpleBlobDetector detector;
+	Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create();
 
 	//Find the blobs!
 	std::vector<KeyPoint> keypoints;
-	detector.detect(src_img, keypoints);
+	detector->detect(src_img, keypoints);
 	//Draw detected blobs as red circles
 	//DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures the size of the circle correspons to the size of the blob
 	drawKeypoints(src_img, keypoints, out_img, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
@@ -101,8 +101,8 @@ const char* keys =
     "{fn  file_name|../data/tree.avi | movie file        }"
 	"{p   pic      |         | new background picture }"
 	"{vid bg_vid   |         | new background video   }"
-	"{cn  contours |         | detect contours}"
-	"{b	  blobs	   |		 | detect blobs}"
+	"{cn  contours |         | detect contours  }"
+	"{bl  blobs    |         | detect blobs, not working}"
 };
 
 //this is a sample for foreground detection functions
@@ -117,7 +117,7 @@ int main(int argc, const char** argv)
 	bool replaceVid = parser.has("bg_vid");
 	bool detectContours = parser.has("contours");
 	bool detectBlobs = parser.has("blobs");
-
+	
 	string picture = parser.get<string>("pic");
 	string bg_video = parser.get<string>("vid");
 
@@ -175,14 +175,14 @@ int main(int argc, const char** argv)
     namedWindow("image", WINDOW_NORMAL);
     namedWindow("foreground mask", WINDOW_NORMAL);
     namedWindow("foreground image", WINDOW_NORMAL);
-	namedWindow("mean background image", WINDOW_NORMAL);
+	//namedWindow("mean background image", WINDOW_NORMAL);
 
 	if(detectContours)
 		namedWindow("Contours", WINDOW_NORMAL);
 	if(detectBlobs)
 		namedWindow("Blobs", WINDOW_NORMAL);
-	
-    Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
+    
+	Ptr<BackgroundSubtractor> bg_model = method == "knn" ?
             createBackgroundSubtractorKNN().dynamicCast<BackgroundSubtractor>() :
             createBackgroundSubtractorMOG2(BG_HISTORY, BG_THRESH, false).dynamicCast<BackgroundSubtractor>();
 
@@ -247,13 +247,14 @@ int main(int argc, const char** argv)
 		if(detectBlobs)
 		{
 			blob_img = draw_blobs(fgmask);
-			imshow("Contours", blob_img);
+			imshow("Blobs", blob_img);
 		}
+		
         imshow("image", img);
         imshow("foreground mask", fgmask);
         imshow("foreground image", fgimg);
-        if(!bgimg.empty())
-          imshow("mean background image", bgimg );
+        /*if(!bgimg.empty())
+          imshow("mean background image", bgimg );*/
 
         char k = (char)waitKey(10); //Original value is 30
         if( k == 27 ) break;
