@@ -51,6 +51,27 @@ Mat draw_contours(Mat source, int thresh)
 	return drawing;
 }
 
+/* @brief:	Detect larger blobs from the binary fg mask
+   @param:	src_img, image source
+   @retval:	output, image file where the output is written
+*/
+Mat detect_blobs(Mat src_img)
+{
+	Mat out_img;
+	if(src_img.empty())
+		return out_img;
+	//Set up a vector with default parameters TODO Find better parameters
+	SimpleBlobDetector detector;
+
+	//Find the blobs!
+	std::vector<KeyPoint> keypoints;
+	detector.detect(src_img, keypoints);
+	//Draw detected blobs as red circles
+	//DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures the size of the circle correspons to the size of the blob
+	drawKeypoints(src_img, keypoints, out_img, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+	return out_img;
+}
+
 /*
    	@brief: Adjust the background subtraction learning rate to weigh the beginning more.
    			Assuming that video starts with only background in the picture
@@ -80,7 +101,8 @@ const char* keys =
     "{fn  file_name|../data/tree.avi | movie file        }"
 	"{p   pic      |         | new background picture }"
 	"{vid bg_vid   |         | new background video   }"
-	"{pd  people   |         | detect people   }"
+	"{cn  contours |         | detect contours}"
+	"{b	  blobs	   |		 | detect blobs}"
 };
 
 //this is a sample for foreground detection functions
