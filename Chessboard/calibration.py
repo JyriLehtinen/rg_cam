@@ -13,14 +13,15 @@ objp[:,:2] = np.mgrid[0:7,0:6].T.reshape(-1,2)
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
-images = glob.glob('elitebook_chess.jpg')
+images = glob.glob('*.jpg')
 
 for fname in images:
 	img = cv2.imread(fname)
 	gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-
+	print("Image %s found" %  str(fname))
+			
 	# Find the chess board corners
-	ret, corners = cv2.findChessboardCorners(gray, (7,6),None)
+	ret, corners = cv2.findChessboardCorners(gray, (6,4),None)
 
 	# If found, add object points, image points (after refining them)
 	if ret == True:
@@ -30,7 +31,7 @@ for fname in images:
 		imgpoints.append(corners)
 
 		# Draw and display the corners
-		cv2.drawChessboardCorners(img, (7,6), corners2,ret)
+		cv2.drawChessboardCorners(img, (6,4), corners,ret)
 		cv2.imshow('img',img)
 		cv2.waitKey(500)
 
