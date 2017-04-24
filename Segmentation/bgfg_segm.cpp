@@ -12,6 +12,8 @@
 
 #include <stdio.h>
 #include <iostream>
+
+#include "test.h"
 using namespace std;
 using namespace cv;
 
@@ -22,6 +24,7 @@ using namespace cv;
 
 /* Global variables */
 vector<Point2f> court_lines;
+vector<Point3f> model_points;
 
 static void help()
 {
@@ -95,6 +98,19 @@ int adjust_learning(int fps, int count, double *rate) //TODO Add more gradual ch
 	}
 
 	return 0;
+}
+/*
+	@brief: This function saves the 3D reference model into the model vectors
+	@param: model, the 3D vectors, units in cm, origin at the center of the court
+	@reval: None
+*/
+void construct_model(vector<Point3f> model)
+{
+	//Starting from the "upper left" service corner across the net, going clocwise
+	model.push_back(Point3f(-411.5, 640, 0));
+	model.push_back(Point3f(411.5, 640, 0));
+	model.push_back(Point3f(-411.5, -640, 0));
+	model.push_back(Point3f(-411.5, -640, 0));
 }
 
 void on_mouse( int e, int x, int y, int d, void *ptr )
@@ -209,7 +225,8 @@ int main(int argc, const char** argv)
 
     Mat img0, img, fgmask, fgimg;
 	Mat bg_img0, bg_img, areas, blob_img;
-
+	
+	construct_model(model_points);
     for(;;)
     {
         cap >> img0;
