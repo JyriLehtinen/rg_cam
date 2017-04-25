@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "test.h"
 using namespace std;
 using namespace cv;
 
@@ -23,8 +22,8 @@ using namespace cv;
 #define BG_THRESH		30		//BG subtraction threshold
 
 /* Global variables */
-vector<Point2d> court_lines;
-vector<Point3d> model_points;
+vector<Point2f> court_lines;
+vector<Point3f> model_points;
 Mat tvec, rvec, camera_matrix, dist_coeffs;
 
 static void help()
@@ -105,13 +104,13 @@ int adjust_learning(int fps, int count, double *rate) //TODO Add more gradual ch
 	@param: model, the 3D vectors, units in cm, origin at the center of the court
 	@reval: None
 */
-void construct_model(vector<Point3d> model)
+void construct_model(vector<Point3f> *model)
 {
 	//Starting from the "upper left" service corner across the net, going clocwise
-	model.push_back(Point3d(-411.5f, 640.0f, 0.0f));
-	model.push_back(Point3d(411.5f, 640.0f, 0.0f));
-	model.push_back(Point3d(-411.5f, -640.0f, 0.0f));
-	model.push_back(Point3d(-411.5f, -640.0f, 0.0f));
+	(*model).push_back(Point3f(-411.5f, 640.0f, 0.0f));
+	(*model).push_back(Point3f(411.5f, 640.0f, 0.0f));
+	(*model).push_back(Point3f(-411.5f, -640.0f, 0.0f));
+	(*model).push_back(Point3f(-411.5f, -640.0f, 0.0f));
 }
 
 /*
@@ -120,15 +119,15 @@ void construct_model(vector<Point3d> model)
    @param: matrix, the output matrix
    @rturn: 0 on success
 */
-int construct_camera(Mat im, Mat matrix, Mat _dist_coeffs)
+int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
 {
 	// Camera internals
     double focal_length = 2.5; // Approximate focal length.
     Point2d center = Point2d(im.cols/2,im.rows/2);
-    matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
-    _dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
+    *matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
+    *_dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
 
-	cout << "Camera Matrix " << endl << matrix << endl ;
+	cout << "Camera Matrix " << endl << camera_matrix << endl ;
 }
 
 
@@ -138,33 +137,15 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 	{
 		if(court_lines.size() < 4)
 		{
-			court_lines.push_back(Point2d(float(x), float(y)));
+			court_lines.push_back(Point2f(float(x), float(y)));
 			cout << x << " " << y << endl;
 		}
 		else
 		{
-			cout << "More than five corners?!" << endl;
-			//solvePnP(model_points, court_lines, camera_matrix, dist_coeffs, rvec, tvec);
+			cout << "Solvin' 'n' shoite!" << endl;
 
-			// 2D image points. If you change the image, you need to change vector
-			std::vector<cv::Point2d> image_points;
-			image_points.push_back( cv::Point2d(359, 391) );    // Nose tip
-			image_points.push_back( cv::Point2d(399, 561) );    // Chin
-			image_points.push_back( cv::Point2d(337, 297) );     // Left eye left corner
-			image_points.push_back( cv::Point2d(513, 301) );    // Right eye right corner
-			image_points.push_back( cv::Point2d(345, 465) );    // Left Mouth corner
-			image_points.push_back( cv::Point2d(453, 469) );    // Right mouth corner
-
-			// 3D model points.
-			std::vector<cv::Point3d> _model_points;
-			_model_points.push_back(cv::Point3d(0.0f, 0.0f, 0.0f));               // Nose tip
-			_model_points.push_back(cv::Point3d(0.0f, -330.0f, -65.0f));          // Chin
-			_model_points.push_back(cv::Point3d(-225.0f, 170.0f, -135.0f));       // Left eye left corner
-			_model_points.push_back(cv::Point3d(225.0f, 170.0f, -135.0f));        // Right eye right corner
-			_model_points.push_back(cv::Point3d(-150.0f, -150.0f, -125.0f));      // Left Mouth corner
-			_model_points.push_back(cv::Point3d(150.0f, -150.0f, -125.0f));       // Right mouth corner
-
-			solvePnP(_model_points, image_points, camera_matrix, dist_coeffs, rvec, tvec);
+			if(	solvePnP(model_points, court_lines, camera_matrix, dist_coeffs, rvec, tvec, false, CV_ITERATIVE))
+				cout << "court solvePnP succeeded?!" << endl;
 		}
 	}
 	return;
@@ -268,7 +249,7 @@ int main(int argc, const char** argv)
 	
 	bool camera_calibrated = false;
 	
-	construct_model(model_points);
+	construct_model(&model_points);
     for(;;)
     {
         cap >> img0;
@@ -280,7 +261,7 @@ int main(int argc, const char** argv)
 
 		if(!camera_calibrated)
 		{
-			construct_camera(img, camera_matrix, dist_coeffs);
+			construct_camera(img, &camera_matrix, &dist_coeffs);
 			camera_calibrated = true;
 		}
         if( fgimg.empty() )
