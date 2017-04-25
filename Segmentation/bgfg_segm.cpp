@@ -109,7 +109,9 @@ void construct_model(vector<Point3f> *model)
 	//Starting from the "upper left" service corner across the net, going clocwise
 	(*model).push_back(Point3f(-411.5f, 640.0f, 0.0f));
 	(*model).push_back(Point3f(411.5f, 640.0f, 0.0f));
-	(*model).push_back(Point3f(-411.5f, -640.0f, 0.0f));
+	(*model).push_back(Point3f(411.5f, 0.0f, 0.0f));
+	(*model).push_back(Point3f(-411.5f, 640.0f, 0.0f));
+	(*model).push_back(Point3f(-411.5f, 0.0f, 0.0f));
 	(*model).push_back(Point3f(-411.5f, -640.0f, 0.0f));
 }
 
@@ -122,7 +124,7 @@ void construct_model(vector<Point3f> *model)
 int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
 {
 	// Camera internals
-    double focal_length = 2.5; // Approximate focal length.
+    double focal_length = im.cols; // Approximate focal length.
     Point2d center = Point2d(im.cols/2,im.rows/2);
     *matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
     *_dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
@@ -135,7 +137,7 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 {
 	if(e == EVENT_LBUTTONDOWN)
 	{
-		if(court_lines.size() < 4)
+		if(court_lines.size() < 6)
 		{
 			court_lines.push_back(Point2f(float(x), float(y)));
 			cout << x << " " << y << endl;
@@ -145,10 +147,36 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 			cout << "Solvin' 'n' shoite!" << endl;
 
 			if(	solvePnP(model_points, court_lines, camera_matrix, dist_coeffs, rvec, tvec, false, CV_ITERATIVE))
+			{
 				cout << "court solvePnP succeeded?!" << endl;
+				cout << "rvec: " << rvec << endl <<  "tvec: " << tvec << endl;
+			}
 		}
 	}
 	return;
+}
+/*
+   @brief: Project the net posts into the image based on solvePnP output
+   @param: _camera, the camera intrisic parameters matrix
+   @param: _distorsion, camera distorsion matrix
+   @param: _rvec, rotation matrix
+   @param: _tvec, translation matrix
+*/
+Mat project_posts(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec)
+{
+	Mat outImage;
+	vector<Point2f> image_points;
+	vector<Point3f> posts;
+	posts.push_back(Point3f(0, 0, 0));
+	
+	projectPoints(posts, _rvec, _tvec, _camera, _distorsion, image_points);	
+	cout << "Projected edges: " << image_points << endl;
+	for(int i=0; i < image_points.size(); i++)
+	{
+		circle(outImage, image_points[i], 3, Scalar(0,0,255), -1);
+	}
+
+	return outImage;
 }
 
 const char* keys =
@@ -315,6 +343,7 @@ int main(int argc, const char** argv)
 			blob_img = draw_blobs(fgmask);
 			imshow("Blobs", blob_img);
 		}
+
 		
         imshow("image", img);
         imshow("foreground mask", fgmask);
@@ -326,6 +355,7 @@ int main(int argc, const char** argv)
         if( k == 27 ) break;
         if( k == ' ' )
         {
+			project_posts(camera_matrix, dist_coeffs, rvec, tvec);
             update_bg_model = !update_bg_model;
             if(update_bg_model)
                 printf("Background update is on\n");
