@@ -128,7 +128,7 @@ int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
     Point2d center = Point2d(im.cols/2,im.rows/2);
     *matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
     *_dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
-
+	
 	cout << "Camera Matrix " << endl << camera_matrix << endl ;
 }
 
@@ -168,6 +168,8 @@ Mat project_posts(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec)
 	vector<Point2f> image_points;
 	vector<Point3f> posts;
 	posts.push_back(Point3f(0, 0, 0));
+	posts.push_back(Point3f(-548.5, 1185, 0));
+	posts.push_back(Point3f(548.5, 1185, 0));
 	
 	projectPoints(posts, _rvec, _tvec, _camera, _distorsion, image_points);	
 	cout << "Projected edges: " << image_points << endl;
@@ -259,7 +261,7 @@ int main(int argc, const char** argv)
 	cout << "Frames per second using video.get(CV_CAP_PROP_FPS) : " << fps << endl;
  
     namedWindow("image", WINDOW_NORMAL);
-    namedWindow("foreground mask", WINDOW_NORMAL);
+    //namedWindow("foreground mask", WINDOW_NORMAL);
     namedWindow("foreground image", WINDOW_NORMAL);
 	//namedWindow("mean background image", WINDOW_NORMAL);
 	setMouseCallback("image", on_mouse, NULL);
@@ -344,18 +346,15 @@ int main(int argc, const char** argv)
 			imshow("Blobs", blob_img);
 		}
 
-		
         imshow("image", img);
-        imshow("foreground mask", fgmask);
+        //imshow("foreground mask", fgmask);
         imshow("foreground image", fgimg);
         /*if(!bgimg.empty())
           imshow("mean background image", bgimg );*/
-
         char k = (char)waitKey(10); //Original value is 30
         if( k == 27 ) break;
         if( k == ' ' )
         {
-			project_posts(camera_matrix, dist_coeffs, rvec, tvec);
             update_bg_model = !update_bg_model;
             if(update_bg_model)
                 printf("Background update is on\n");
