@@ -116,7 +116,7 @@ void construct_model(vector<Point3f> *model)
 }
 
 /*
-   @brief: Construct the camera intrisic parameters. TODO actually calibrate these.
+   @brief: Construct the camera intrisic parameters. TODO Add a rough calibration function?
    @param: im, image taken with the camera in use
    @param: matrix, the output matrix
    @rturn: 0 on success
@@ -130,6 +130,7 @@ int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
     *matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
     *_dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
 */	
+	// Values for Sony Xperia Z3 Compact, default horizontal video
 	*matrix = (Mat_<double>(3,3) <<
 			1.88389429e+03, 0.00000000e+00, 9.55374691e+02,
 			0.00000000e+00, 1.89846625e+03, 5.44115238e+02,
@@ -181,7 +182,7 @@ Mat project_posts(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec)
 	posts.push_back(Point3f(823.0f, 0.0f, 1189.0f));
 	posts.push_back(Point3f(0.0f, 0.0f, 0.0f));
 	projectPoints(posts, _rvec, _tvec, _camera, _distorsion, image_points);	
-	cout << "Projected edges: " << image_points << endl;
+	cout << "Projected points: " << image_points << endl;
 	for(int i=0; i < image_points.size(); i++)
 	{
 		circle(outImage, image_points[i], 3, Scalar(0,0,255), -1);
