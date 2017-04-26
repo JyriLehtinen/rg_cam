@@ -166,29 +166,34 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 	return;
 }
 /*
-   @brief: Project the net posts into the image based on solvePnP output
+   @brief: Project points into the image based on solvePnP output
    @param: _camera, the camera intrisic parameters matrix
    @param: _distorsion, camera distorsion matrix
    @param: _rvec, rotation matrix
    @param: _tvec, translation matrix
 */
-Mat project_posts(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec)
+Mat project_points(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat *image=NULL)
 {
-	Mat outImage;
 	vector<Point2f> image_points;
 	vector<Point3f> posts;
 	
-	posts.push_back(Point3f(0.0f, 0.0f, 1189.0f));
-	posts.push_back(Point3f(823.0f, 0.0f, 1189.0f));
-	posts.push_back(Point3f(0.0f, 0.0f, 0.0f));
+	posts.push_back(Point3f(-137.2f, 0.0f, 1189.0f));
+	posts.push_back(Point3f(960.2f, 0.0f, 1189.0f));
+	posts.push_back(Point3f(-228.6f, 0.0f, 0.0f));
+	posts.push_back(Point3f(1051.6f, 0.0f, 0.0f));
 	projectPoints(posts, _rvec, _tvec, _camera, _distorsion, image_points);	
-	cout << "Projected points: " << image_points << endl;
-	for(int i=0; i < image_points.size(); i++)
+	//cout << "Projected points: " << image_points << endl;
+	if(image == NULL || (*image).empty())
+		return *image;
+	else
 	{
-		circle(outImage, image_points[i], 3, Scalar(0,0,255), -1);
+		for(int i=0; i < image_points.size(); i++)
+		{
+			circle(*image, image_points[i], 10, Scalar(0,0,255), 4);
+		}
 	}
-
-	return outImage;
+	
+	return *image;
 }
 
 const char* keys =
@@ -355,6 +360,8 @@ int main(int argc, const char** argv)
 			blob_img = draw_blobs(fgmask);
 			imshow("Blobs", blob_img);
 		}
+		if(!update_bg_model)
+			img = project_points(camera_matrix, dist_coeffs, rvec, tvec, &img);
 
         imshow("image", img);
         //imshow("foreground mask", fgmask);
@@ -366,7 +373,7 @@ int main(int argc, const char** argv)
         if( k == ' ' )
         {
             update_bg_model = !update_bg_model;
-			project_posts(camera_matrix, dist_coeffs, rvec, tvec);
+			project_points(camera_matrix, dist_coeffs, rvec, tvec, &img);
 
             if(update_bg_model)
                 printf("Background update is on\n");
