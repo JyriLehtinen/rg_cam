@@ -107,12 +107,12 @@ int adjust_learning(int fps, int count, double *rate) //TODO Add more gradual ch
 void construct_model(vector<Point3f> *model)
 {
 	//Starting from the "upper left" service corner across the net, going clocwise
-	(*model).push_back(Point3f(-411.5f, 640.0f, 0.0f));
-	(*model).push_back(Point3f(411.5f, 640.0f, 0.0f));
-	(*model).push_back(Point3f(411.5f, 0.0f, 0.0f));
-	(*model).push_back(Point3f(-411.5f, 640.0f, 0.0f));
-	(*model).push_back(Point3f(-411.5f, 0.0f, 0.0f));
-	(*model).push_back(Point3f(-411.5f, -640.0f, 0.0f));
+	(*model).push_back(Point3f(0.0f, 0.0f, 640.0f));
+	(*model).push_back(Point3f(823.0f, 0.0f, 640.0f));
+	(*model).push_back(Point3f(823.0f, 0.0f, 0.0f));
+	(*model).push_back(Point3f(823.0f, 0.0f, -640.0f));
+	(*model).push_back(Point3f(0.0f, 0.0f, -640.0f));
+	(*model).push_back(Point3f(0.0f, 0.0f, 0.0f));
 }
 
 /*
@@ -123,12 +123,21 @@ void construct_model(vector<Point3f> *model)
 */
 int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
 {
+	/*
 	// Camera internals
     double focal_length = im.cols; // Approximate focal length.
     Point2d center = Point2d(im.cols/2,im.rows/2);
     *matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
     *_dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
-	
+*/	
+	*matrix = (Mat_<double>(3,3) <<
+			1.88389429e+03, 0.00000000e+00, 9.55374691e+02,
+			0.00000000e+00, 1.89846625e+03, 5.44115238e+02,
+			0.00000000e+00, 0.00000000e+00, 1.00000000e+00);
+			
+	*_dist_coeffs = (Mat_<double>(5,1) <<
+			-1.71533585e-01, 5.12063874e+00, 8.05474932e-05, -3.19247362e-03, -3.58186431e+01);
+
 	cout << "Camera Matrix " << endl << camera_matrix << endl ;
 }
 
@@ -167,10 +176,10 @@ Mat project_posts(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec)
 	Mat outImage;
 	vector<Point2f> image_points;
 	vector<Point3f> posts;
-	posts.push_back(Point3f(0, 0, 0));
-	posts.push_back(Point3f(-548.5, 1185, 0));
-	posts.push_back(Point3f(548.5, 1185, 0));
 	
+	posts.push_back(Point3f(0.0f, 0.0f, 1189.0f));
+	posts.push_back(Point3f(823.0f, 0.0f, 1189.0f));
+	posts.push_back(Point3f(0.0f, 0.0f, 0.0f));
 	projectPoints(posts, _rvec, _tvec, _camera, _distorsion, image_points);	
 	cout << "Projected edges: " << image_points << endl;
 	for(int i=0; i < image_points.size(); i++)
@@ -287,8 +296,8 @@ int main(int argc, const char** argv)
         if( img0.empty() )
             break;
 
-        resize(img0, img, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
-
+        //resize(img0, img, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
+		img = img0;
 		if(!camera_calibrated)
 		{
 			construct_camera(img, &camera_matrix, &dist_coeffs);
@@ -310,7 +319,7 @@ int main(int argc, const char** argv)
 
 		if(replacePic)
 		{
-			resize(image, bg_img, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
+			resize(image, bg_img, Size(img0.rows, img0.cols), INTER_LINEAR);
 		}
 
 
@@ -356,6 +365,8 @@ int main(int argc, const char** argv)
         if( k == ' ' )
         {
             update_bg_model = !update_bg_model;
+			project_posts(camera_matrix, dist_coeffs, rvec, tvec);
+
             if(update_bg_model)
                 printf("Background update is on\n");
             else
