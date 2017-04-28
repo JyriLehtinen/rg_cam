@@ -1,6 +1,0 @@
-  cmake_minimum_required(VERSION 2.8)
-  project( BG_Sub )
-  find_package( OpenCV REQUIRED )
-  add_executable( BG_Sub bgfg_segm.cpp )
-  target_link_libraries( BG_Sub ${OpenCV_LIBS} )
-  set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
