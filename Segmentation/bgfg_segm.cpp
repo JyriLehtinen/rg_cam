@@ -302,7 +302,6 @@ int main(int argc, const char** argv)
         if( img0.empty() )
             break;
 
-        //resize(img0, img, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
 		img = img0;
 		if(!camera_calibrated)
 		{
@@ -325,7 +324,7 @@ int main(int argc, const char** argv)
 
 		if(replacePic)
 		{
-			resize(image, bg_img, Size(img0.rows, img0.cols), INTER_LINEAR);
+			resize(image, bg_img, img0.size(), 0, 0, INTER_LINEAR);
 		}
 
 
@@ -338,7 +337,7 @@ int main(int argc, const char** argv)
 				bg_cap >> bg_img0;
 			}
 			if(!bg_img0.empty())
-				resize(bg_img0, bg_img, Size(640, 640*img0.rows/img0.cols), INTER_LINEAR);
+				resize(bg_img0, bg_img, img0.size(), 0, 0, INTER_LINEAR);
 		}
 
         fgimg = Scalar::all(0);
