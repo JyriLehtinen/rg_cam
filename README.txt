@@ -1,6 +1,5 @@
 # rg_cam
 ME310 RG Cam project repository
-ILLUSTRATION WORKS ONLY WHEN YOU VIEW THE RAW FILE!
 
 ## INSTALLATION
 
