@@ -35,50 +35,6 @@ static void help()
 "			./bgfg_segm [--camera]=<use camera, if this key is present>, [--file_name]=<path to movie file> \n\n");
 }
 
-/** @function thresh_callback */
-Mat draw_contours(Mat source, int thresh)
-{
-  Mat canny_output;
-  vector<vector<Point> > contours;
-  vector<Vec4i> hierarchy;
-	
-  //Blur the image to reduce noise
-  blur( source, source, Size(2, 2) );
-  /// Detect edges using canny
-  Canny( source, canny_output, thresh, thresh*2, 3 );
-  /// Find contours
-  findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-
-  /// Draw contours
-  Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
-  for( int i = 0; i< contours.size(); i++ )
-     {
-    	drawContours( drawing, contours, i, 0xFF, CV_FILLED, 8, hierarchy, 0, Point() ); //Orig. width 2, CV_FILLED for fill
-     }
-	return drawing;
-}
-
-/* @brief:	Detect larger blobs from the binary fg mask
-   @param:	src_img, image source
-   @retval:	output, image file where the output is written
-*/
-Mat draw_blobs(Mat src_img) //TODO Doesn't really work here
-{
-	Mat out_img;
-	if(src_img.empty())
-		return out_img;
-	//Set up a vector with default parameters TODO Find better parameters
-	Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create();
-
-	//Find the blobs!
-	std::vector<KeyPoint> keypoints;
-	detector->detect(src_img, keypoints);
-	//Draw detected blobs as red circles
-	//DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures the size of the circle correspons to the size of the blob
-	drawKeypoints(src_img, keypoints, out_img, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-	return out_img;
-}
-
 /*
    	@brief: Adjust the background subtraction learning rate to weigh the beginning more.
    			Assuming that video starts with only background in the picture
@@ -98,48 +54,6 @@ int adjust_learning(int fps, int count, double *rate) //TODO Add more gradual ch
 	}
 
 	return 0;
-}
-/*
-	@brief: This function saves the 3D reference model into the model vectors
-	@param: model, the 3D vectors, units in cm, origin at the center of the court
-	@reval: None
-*/
-void construct_model(vector<Point3f> *model)
-{
-	//Starting from the "upper left" service corner across the net, going clocwise
-	(*model).push_back(Point3f(0.0f, 0.0f, 640.0f));
-	(*model).push_back(Point3f(823.0f, 0.0f, 640.0f));
-	(*model).push_back(Point3f(823.0f, 0.0f, 0.0f));
-	(*model).push_back(Point3f(823.0f, 0.0f, -640.0f));
-	(*model).push_back(Point3f(0.0f, 0.0f, -640.0f));
-	(*model).push_back(Point3f(0.0f, 0.0f, 0.0f));
-}
-
-/*
-   @brief: Construct the camera intrisic parameters. TODO Add a rough calibration function?
-   @param: im, image taken with the camera in use
-   @param: matrix, the output matrix
-   @rturn: 0 on success
-*/
-int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
-{
-	/*
-	// Camera internals
-    double focal_length = im.cols; // Approximate focal length.
-    Point2d center = Point2d(im.cols/2,im.rows/2);
-    *matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
-    *_dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
-*/	
-	// Values for Sony Xperia Z3 Compact, default horizontal video
-	*matrix = (Mat_<double>(3,3) <<
-			1.88389429e+03, 0.00000000e+00, 9.55374691e+02,
-			0.00000000e+00, 1.89846625e+03, 5.44115238e+02,
-			0.00000000e+00, 0.00000000e+00, 1.00000000e+00);
-			
-	*_dist_coeffs = (Mat_<double>(5,1) <<
-			-1.71533585e-01, 5.12063874e+00, 8.05474932e-05, -3.19247362e-03, -3.58186431e+01);
-
-	cout << "Camera Matrix " << endl << camera_matrix << endl ;
 }
 
 
@@ -164,36 +78,6 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 		}
 	}
 	return;
-}
-/*
-   @brief: Project points into the image based on solvePnP output
-   @param: _camera, the camera intrisic parameters matrix
-   @param: _distorsion, camera distorsion matrix
-   @param: _rvec, rotation matrix
-   @param: _tvec, translation matrix
-*/
-Mat project_points(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat *image=NULL)
-{
-	vector<Point2f> image_points;
-	vector<Point3f> posts;
-	
-	posts.push_back(Point3f(-137.2f, 0.0f, 1189.0f));
-	posts.push_back(Point3f(960.2f, 0.0f, 1189.0f));
-	posts.push_back(Point3f(-228.6f, 0.0f, 0.0f));
-	posts.push_back(Point3f(1051.6f, 0.0f, 0.0f));
-	projectPoints(posts, _rvec, _tvec, _camera, _distorsion, image_points);	
-	//cout << "Projected points: " << image_points << endl;
-	if(image == NULL || (*image).empty())
-		return *image;
-	else
-	{
-		for(int i=0; i < image_points.size(); i++)
-		{
-			circle(*image, image_points[i], 10, Scalar(0,0,255), 4);
-		}
-	}
-	
-	return *image;
 }
 
 const char* keys =
