@@ -13,6 +13,10 @@
 #include <stdio.h>
 #include <iostream>
 
+#include "foreground.h"
+#include "projection.h"
+
+
 using namespace std;
 using namespace cv;
 
