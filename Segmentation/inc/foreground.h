@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 
-using namespace cv;
 /*
    @brief: Find object contours from the image
    @param: source, source image
@@ -23,13 +22,13 @@ using namespace cv;
    @retval: image with the contour lines
 */
 
-Mat draw_contours(Mat source, int thresh);
+cv::Mat draw_contours(cv::Mat source, int thresh);
 
 /*
    @brief:	Detect larger blobs from the binary fg mask
    @param:	src_img, image source
    @retval:	output, image file where the output is written
 */
-Mat draw_blobs(Mat src_img);
+cv::Mat draw_blobs(cv::Mat src_img);
 
 #endif //FOREGROUND_H
