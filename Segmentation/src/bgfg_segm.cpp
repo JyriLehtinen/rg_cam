@@ -15,7 +15,7 @@
 
 #include "foreground.h"
 #include "projection.h"
-
+#include "rg_ogl_hpp"
 
 using namespace std;
 using namespace cv;
