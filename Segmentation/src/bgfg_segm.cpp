@@ -15,7 +15,7 @@
 
 #include "foreground.h"
 #include "projection.h"
-#include "rg_ogl_hpp"
+#include "rg_ogl.hpp"
 
 using namespace std;
 using namespace cv;
@@ -29,6 +29,11 @@ using namespace cv;
 vector<Point2f> court_lines;
 vector<Point3f> model_points;
 Mat tvec, rvec, camera_matrix, dist_coeffs;
+GLFWwindow *window;
+
+void error_callback(int errnum, const char *desc) {
+    cout << "Error: " << desc << endl;
+}
 
 static void help()
 {
@@ -115,6 +120,18 @@ int main(int argc, const char** argv)
     string file = parser.get<string>("file_name");
     string method = parser.get<string>("method");
     VideoCapture cap;
+
+    const GLubyte * strGLVersion;
+    glfwSetErrorCallback(error_callback);
+    if (!glfwInit())
+        exit(EXIT_FAILURE);
+
+    glfwSetErrorCallback(error_callback);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	double* rate = (double *)malloc(sizeof(double));
 	int fps;
