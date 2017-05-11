@@ -77,3 +77,9 @@ Mat project_points(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat *imag
 	
 	return *image;
 }
+
+Mat translate_coords(Mat _rvec, Mat _tvec)
+{
+
+}
+
