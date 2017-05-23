@@ -76,8 +76,11 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 
 			if(	solvePnP(model_points, court_lines, camera_matrix, dist_coeffs, rvec, tvec, false, CV_ITERATIVE))
 			{
-				cout << "court solvePnP succeeded?!" << endl;
+				cout << "court solvePnP succeeded!" << endl;
 				cout << "rvec: " << rvec << endl <<  "tvec: " << tvec << endl;
+				Mat rotM;
+				Rodrigues(rvec, rotM);
+				cout << "Rotation matrix:" << endl << rotM << endl;
 			}
 		}
 	}
