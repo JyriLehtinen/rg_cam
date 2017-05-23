@@ -81,6 +81,9 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 				Mat rotM;
 				Rodrigues(rvec, rotM);
 				cout << "Rotation matrix:" << endl << rotM << endl;
+				Mat transfM(4, 4, CV_64F);
+				construct_transformation(rvec, tvec, &transfM);
+				cout << "Transformation matrix:" << endl << transfM << endl;
 			}
 		}
 	}

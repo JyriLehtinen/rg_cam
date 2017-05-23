@@ -77,3 +77,35 @@ Mat project_points(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat *imag
 	
 	return *image;
 }
+
+/*
+   @brief: Create a transformation matrix we pass to the Blender API
+   @param: rvec, Rotation vector solved with solvePnP()
+   @param: tvec, Translation vector solved with solvePnP()
+   @param: dst, pointer to output matrix
+   @retval: 0 on success
+*/
+int construct_transformation(Mat rvec, Mat tvec, Mat* dst)
+{
+	Mat rotation; 
+	Rodrigues(rvec, rotation);
+
+	for(unsigned int row=0; row<3; ++row)
+	{
+	   for(unsigned int col=0; col<3; ++col)
+	   {
+		  dst->at<double>(row, col) = rotation.at<double>(row, col);
+	   }
+	   dst->at<double>(row, 3) = tvec.at<double>(row, 0);
+	}
+
+	for(int col=0; col < 3; ++col)
+	{
+		dst->at<double>(3, col) = 0.0f;
+	}
+
+	dst->at<double>(3, 3) = 1.0f;
+
+	return 0;
+}
+
