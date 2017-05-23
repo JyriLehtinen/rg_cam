@@ -12,12 +12,12 @@ using namespace std;
 void construct_model(vector<Point3f> *model)
 {
 	//Starting from the "upper left" service corner across the net, going clocwise
-	(*model).push_back(Point3f(0.0f, 0.0f, 640.0f));
-	(*model).push_back(Point3f(823.0f, 0.0f, 640.0f));
-	(*model).push_back(Point3f(823.0f, 0.0f, 0.0f));
-	(*model).push_back(Point3f(823.0f, 0.0f, -640.0f));
-	(*model).push_back(Point3f(0.0f, 0.0f, -640.0f));
-	(*model).push_back(Point3f(0.0f, 0.0f, 0.0f));
+	(*model).push_back(Point3f(-411.5f, 0.0f, 640.0f));
+	(*model).push_back(Point3f(411.5f, 0.0f, 640.0f));
+	(*model).push_back(Point3f(411.5f, 0.0f, 0.0f));
+	(*model).push_back(Point3f(411.5f, 0.0f, -640.0f));
+	(*model).push_back(Point3f(-411.5f, 0.0f, -640.0f));
+	(*model).push_back(Point3f(-411.5f, 0.0f, 0.0f));
 }
 
 /*
