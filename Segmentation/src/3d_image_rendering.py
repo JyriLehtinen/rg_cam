@@ -3,10 +3,17 @@ import math
 import mathutils
 
 
-def adjust_camera(transfrom_matrix , scene):
-    scene.camera.location.x = -transform_matrix[0][0]
-    scene.camera.location.y = transform_matrix[1][2]
-    scene.camera.location.z = -transform_matrix[2][1]
+def adjust_camera(camera_coordinates, target_coordinates, scene):
+    scene.camera.location.x = camera_coordinates[0]
+    scene.camera.location.y = camera_coordinates[1]
+    scene.camera.location.z = camera_coordinates[2]
+
+    # Defining dx, dy and dz for calculations
+    dx = target_coordinates[0] - camera_coordinates[0]
+    dy = target_coordinates[1] - camera_coordinates[1]
+    dz = target_coordinates[2] - camera_coordinates[2]
+
+    print("dx, dy, dz:", dx, dy, dz)
 
     # Calculating euler rotation xrad and zrad
     xRad = (3.14159/2.) + math.atan2(dz, math.sqrt(dy**2 + dx**2))
@@ -29,22 +36,21 @@ def capture_image(scene, path):
     print("Image captured")
 
 
-
-#if __name__ == "__main__":
-
 def main():
+###if __name__ == "__main__":
+
     # Open .blender file
     # Filepath for 3D .blend model
-    bpy.ops.wm.open_mainfile(filepath="dodge-challenger_model.blend1")
+    bpy.ops.wm.open_mainfile(filepath='../../pics/stadium.blend')
 
     # Create scene
     scene = bpy.data.scenes["Scene"]
     # Camera coordinates for testing
-    camera_location = [10.0, 10.0, 10.0]
+    camera_location = [30.0, 30.0, 30.0]
     # Target location for testing
     target_location = [0, 0, 0]
     # Path to save rendered image in
-    image_path = 'TestRender.jpg'
+    image_path = 'render.jpg'
 
     adjust_camera(camera_location, target_location, scene)
     capture_image(scene, image_path)
