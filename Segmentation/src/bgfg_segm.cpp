@@ -1,3 +1,6 @@
+//Documentation said to include <Python.h> first for *reasons*
+#include "python_api.h"
+
 #include "opencv2/core.hpp"
 #include <opencv2/core/utility.hpp>
 #include "opencv2/imgproc.hpp"
@@ -15,7 +18,6 @@
 
 #include "foreground.h"
 #include "projection.h"
-
 
 using namespace std;
 using namespace cv;
@@ -106,6 +108,7 @@ const char* keys =
 int main(int argc, const char** argv)
 {
     help();
+	init_python_api();
 
     CommandLineParser parser(argc, argv, keys);
     bool useCamera = parser.has("camera");

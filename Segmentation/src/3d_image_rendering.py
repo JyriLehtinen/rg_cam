@@ -3,17 +3,10 @@ import math
 import mathutils
 
 
-def adjust_camera(camera_coordinates, target_coordinates, scene):
-    scene.camera.location.x = camera_coordinates[0]
-    scene.camera.location.y = camera_coordinates[1]
-    scene.camera.location.z = camera_coordinates[2]
-
-    # Defining dx, dy and dz for calculations
-    dx = target_coordinates[0] - camera_coordinates[0]
-    dy = target_coordinates[1] - camera_coordinates[1]
-    dz = target_coordinates[2] - camera_coordinates[2]
-
-    print("dx, dy, dz:", dx, dy, dz)
+def adjust_camera(transfrom_matrix , scene):
+    scene.camera.location.x = -transform_matrix[0][0]
+    scene.camera.location.y = transform_matrix[1][2]
+    scene.camera.location.z = -transform_matrix[2][1]
 
     # Calculating euler rotation xrad and zrad
     xRad = (3.14159/2.) + math.atan2(dz, math.sqrt(dy**2 + dx**2))
@@ -37,8 +30,9 @@ def capture_image(scene, path):
 
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
 
+def main():
     # Open .blender file
     # Filepath for 3D .blend model
     bpy.ops.wm.open_mainfile(filepath="dodge-challenger_model.blend1")
