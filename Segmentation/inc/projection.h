@@ -41,4 +41,13 @@ int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs);
 */
 Mat project_points(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat *image);
 
+
+/*
+   @brief: Create a transformation matrix we pass to the Blender API
+   @param: rvec, Rotation vector solved with solvePnP()
+   @param: tvec, Translation vector solved with solvePnP()
+   @param: dst, pointer to output matrix
+   @retval: 0 on success
+*/
+int construct_transformation(Mat rvec, Mat tvec, Mat* dst);
 #endif //PROJECTION_H
