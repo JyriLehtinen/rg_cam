@@ -36,8 +36,11 @@ def capture_image(scene, path):
     print("Image captured")
 
 
-def main():
+def main_(string):
 ###if __name__ == "__main__":
+
+    if(string):
+        print(string.decode("ascii"))
 
     # Open .blender file
     # Filepath for 3D .blend model
@@ -53,4 +56,5 @@ def main():
     image_path = 'render.jpg'
 
     adjust_camera(camera_location, target_location, scene)
-    capture_image(scene, image_path)
+#capture_image(scene, image_path)
+    print("Python finished\n\n\n\n")

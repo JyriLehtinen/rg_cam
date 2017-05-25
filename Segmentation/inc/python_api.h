@@ -3,6 +3,7 @@
 
 #include <Python.h>
 #include <stdio.h>
+#include <string.h>
 
 void init_python_api(void);
 
