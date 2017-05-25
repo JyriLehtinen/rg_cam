@@ -14,7 +14,9 @@
 #include <opencv2/imgcodecs.hpp>
 
 #include <stdio.h>
+#include <string.h>
 #include <iostream>
+#include <sstream> //Dirty solution, but will do for now :S
 
 #include "foreground.h"
 #include "projection.h"
@@ -76,8 +78,12 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 		{
 			cout << "Solvin' 'n' shoite!" << endl;
 
+            stringstream parsed;
+
+
 			if(	solvePnP(model_points, court_lines, camera_matrix, dist_coeffs, rvec, tvec, false, CV_ITERATIVE))
 			{
+
 				cout << "court solvePnP succeeded!" << endl;
 				cout << "rvec: " << rvec << endl <<  "tvec: " << tvec << endl;
 				Mat rotM;
@@ -85,10 +91,23 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 				cout << "Rotation matrix:" << endl << rotM << endl;
 				Mat transfM(4, 4, CV_64F);
 				construct_transformation(rvec, tvec, &transfM);
-				cout << "Transformation matrix:" << endl << transfM << endl;
+//				cout << "Transformation matrix:" << endl << transfM << endl;
+
+                parsed << transfM;
+
+                char* tmp = (char*) malloc(parsed.str().size());
+                strcpy(tmp, parsed.str().c_str()); //This is disgusting
+                //cout << parsed.str() << endl;
+//                printf("\n\n%s\n\n", tmp);
+
+                init_python_api(tmp);
+                free(tmp);
+
 			}
+                
 		}
 	}
+
 	return;
 }
 
@@ -108,7 +127,9 @@ const char* keys =
 int main(int argc, const char** argv)
 {
     help();
-	init_python_api();
+
+   // const char* data_to_python = "\n\n\t\t\tAWESOMESAUCE\n\n\n";
+//	init_python_api((char*)data_to_python);
 
     CommandLineParser parser(argc, argv, keys);
     bool useCamera = parser.has("camera");

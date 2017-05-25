@@ -1,7 +1,7 @@
 #include "python_api.h"
 
 
-void init_python_api(void)
+void init_python_api(char* parsed_data)
 {
 	Py_Initialize();  // Initialize the Python interpreter.
 
@@ -31,8 +31,8 @@ void init_python_api(void)
 
 	pArgs = PyTuple_New(1);
     printf("\n\nNumber of arguments: %ld\n", PyTuple_Size(pArgs));
-    const char* str = "Don't drop the ball!\n\n";
-    pValue = PyByteArray_FromStringAndSize(str, strlen(str));
+//    const char* parsed_data = "Don't drop the ball!\n\n";
+    pValue = PyByteArray_FromStringAndSize(parsed_data, strlen(parsed_data));
     if (!pValue)
     {
         Py_DECREF(pArgs);
@@ -47,5 +47,5 @@ void init_python_api(void)
     printf("This is what I'm passing to python: %s\n", PyByteArray_AsString(pValue));
 
 	if(!PyObject_Call(pFunc, pArgs, NULL))
-        fprintf(stderr, "\nCalling failed\n");
+        printf("\nCalling failed\n");
 }
