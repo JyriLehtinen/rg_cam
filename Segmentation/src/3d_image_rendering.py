@@ -1,8 +1,9 @@
 import bpy
 import math
 import mathutils
-import csv
+import parser
 
+#This is the original function
 def _adjust_camera(camera_coordinates, target_coordinates, scene):
     scene.camera.location.x = camera_coordinates[0]
     scene.camera.location.y = camera_coordinates[1]
@@ -31,6 +32,8 @@ def _adjust_camera(camera_coordinates, target_coordinates, scene):
     scene.camera.rotation_euler = mathutils.Euler((xRad, 0, zRad), 'XYZ')
 
     print("Camera adjusted")
+
+
 
 def adjust_camera(camera_coordinates, eulers, scene):
 
@@ -66,7 +69,6 @@ def build_array(string):
 
 
 def main_(string):
-###if __name__ == "__main__":
 
     if(string):
         print(string.decode("ascii"))
@@ -84,9 +86,9 @@ def main_(string):
     # Path to save rendered image in
     image_path = 'render.jpg'
 
-    adjust_camera(camera_location, target_location, scene)
-#capture_image(scene, image_path)
-    print("Python finished\n\n\n\n")
+    adjust_camera(camera_location, euler_angles, scene)
+    capture_image(scene, image_path)
+    print("Python finished\n\n\n")
 
 
 
