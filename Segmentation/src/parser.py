@@ -21,7 +21,7 @@ def get_rotation_matrix(transformationM):
 
 def get_translation_vector(transformationM):
 	transV = transformationM[:, 3]
-	trasnV = trasnV[:3]
+	transV = transV[:3]
 	return transV
 
 def get_position(transformationM):
@@ -34,8 +34,8 @@ def get_position(transformationM):
 	position = numpy.squeeze(numpy.asarray(position))
 	position[2] = -position[2]
 
-	for element in position:
-		position[element] /= 100.0
+	for i in range(3):
+		position[i] /= 100.0
 
 	return position
 

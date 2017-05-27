@@ -56,42 +56,34 @@ def capture_image(scene, path):
     print("Image captured")
 
 
-def build_array(string):
-	#This is where I should be parsing the format of the matrix into correct format, like bytearray
-#	[0.9996112060025656, 0.02751455566943147, 0.004515092514032283, 30.88144708139786;
-# -0.02727902114228923, 0.9985763003920589, -0.04583914594347553, 92.68978101851303;
-# -0.005769908111491143, 0.04569815665453551, 0.9989386300663132, 1793.480325390813;
-# 0, 0, 0, 1]
-
-	cam_coords[0] = 10
-	cam_coords[1] = 10
-	cam_coords[2] = 10
-
-
 def main_(string):
 
-    if(string):
-        print(string.decode("ascii"))
+	transformM = parser.get_transformation_matrix(string)
+
+	print("Transformation matrix:")
+	print(transformM)
+	print("\n\n")
 
     # Open .blender file
     # Filepath for 3D .blend model
-    bpy.ops.wm.open_mainfile(filepath='../../pics/stadium.blend')
+	bpy.ops.wm.open_mainfile(filepath='../../pics/stadium.blend')
+#bpy.ops.wm.open_mainfile(filepath='/home/jyri/Desktop/BlenderApi/land.blend')
 
-    # Create scene
-    scene = bpy.data.scenes["Scene"]
-    # Camera coordinates for testing
-    camera_location = [30.0, 30.0, 30.0]
-    # Target location for testing
-    target_location = [0, 0, 0]
-    # Path to save rendered image in
-    image_path = 'render.jpg'
+	# Create scene
+	scene = bpy.data.scenes["Scene"]
+# Camera coordinates for testing
+	camera_location = parser.get_position(transformM)
+# Camera rotation angles
+	euler_angles = parser.get_euler_angles(transformM)
+# Path to save rendered image in
+	image_path = 'render.jpg'
 
-    adjust_camera(camera_location, euler_angles, scene)
-    capture_image(scene, image_path)
-    print("Python finished\n\n\n")
+	adjust_camera(camera_location, euler_angles, scene)
+	capture_image(scene, image_path)
+	print("Python finished\n\n")
 
 
-
+comment = '''
 if __name__ == "__main__":
 
     # Open .blender file
@@ -115,3 +107,7 @@ if __name__ == "__main__":
     capture_image(scene, image_path)
 
     print("Python finished\n\n")
+	'''
+
+if __name__ == "__main__":
+	main_("[0.9996112060025656, 0.02751455566943147, 0.004515092514032283, 30.88144708139786;\n  -0.02727902114228923, 0.9985763003920589, -0.04583914594347553, 92.68978101851303;\n  -0.005769908111491143, 0.04569815665453551, 0.9989386300663132, 1793.480325390813;\n  0, 0, 0, 1]")
