@@ -51,3 +51,15 @@ Mat project_points(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat *imag
 */
 int construct_transformation(Mat rvec, Mat tvec, Mat* dst);
 #endif //PROJECTION_H
+
+/*
+   @brief: Cut the edge out from the original video, leaving the court only
+   @param: _camera, the camera intrisic parameters matrix
+   @param: _distorsion, camera distorsion matrix
+   @param: _rvec, rotation matrix
+   @param: _tvec, translation matrix
+   @param: image, pointer to the image we're editing
+   @retval: Cropped image
+*/
+
+Mat crop_image(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat image);

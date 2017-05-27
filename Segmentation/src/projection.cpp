@@ -118,3 +118,27 @@ int construct_transformation(Mat rvec, Mat tvec, Mat* dst)
 	return 0;
 }
 
+Mat crop_image(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat image)
+{
+
+	/* Our region of interest in the video is the original court,
+	   slightly extended on the sides and elevated to get the original net in the picture.
+	   The following points are just outside the (doubles) court lines
+	*/
+
+	vector<Point2f> image_points;
+	vector<Point3f> world_edges;
+	
+	world_edges.push_back(Point3f(-648.7f, -1189.0f, 107.0f)); //"From bottom left corner of doubles, 1m to the left and 1,07cm up.
+	world_edges.push_back(Point3f(-648.7f, 1189.0f, 107.0f)); //"From upper left corner of doubles, 1m to the left and 1,07cm up.
+	world_edges.push_back(Point3f(648.7f, 1189.0f, 107.0f)); //"From upper right corner of doubles, 1m to the right and 1,07cm up.
+	world_edges.push_back(Point3f(648.7f, -1189.0f, 107.0f)); //"From bottom right corner of doubles, 1m to the right and 1,07cm up.
+
+	projectPoints(world_edges, _rvec, _tvec, _camera, _distorsion, image_points);	//Calculate where these points would be in the image
+
+	//Create a ROI from calculated points TODO drawContours to mask
+	//Limit ROI to image max dimensions TODO Overlap of mask and rect(src.height, src, width) etc...
+	//Copy mask from the original image
+	//Return the cropped image
+	return image; //TODO: Return the cropped image instead of the original.
+}

@@ -31,7 +31,6 @@ void init_python_api(char* parsed_data)
 
 	pArgs = PyTuple_New(1);
     printf("\n\nNumber of arguments: %ld\n", PyTuple_Size(pArgs));
-//    const char* parsed_data = "Don't drop the ball!\n\n";
     pValue = PyByteArray_FromStringAndSize(parsed_data, strlen(parsed_data));
     if (!pValue)
     {
