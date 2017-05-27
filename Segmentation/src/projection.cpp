@@ -11,12 +11,20 @@ using namespace std;
 */
 void construct_model(vector<Point3f> *model)
 {
+	/*
 	//Starting from the "upper left" service corner across the net, going clocwise
 	(*model).push_back(Point3f(-411.5f, 0.0f, 640.0f));
 	(*model).push_back(Point3f(411.5f, 0.0f, 640.0f));
 	(*model).push_back(Point3f(411.5f, 0.0f, 0.0f));
 	(*model).push_back(Point3f(411.5f, 0.0f, -640.0f));
 	(*model).push_back(Point3f(-411.5f, 0.0f, -640.0f));
+	(*model).push_back(Point3f(-411.5f, 0.0f, 0.0f));
+	*/
+	(*model).push_back(Point3f(-411.5f, 640.0f, 0.0f));
+	(*model).push_back(Point3f(411.5f, 640.0f, 0.0f));
+	(*model).push_back(Point3f(411.5f, 0.0f, 0.0f));
+	(*model).push_back(Point3f(411.5f, -640.0f, 0.0f));
+	(*model).push_back(Point3f(-411.5f, -640.0f, 0.0f));
 	(*model).push_back(Point3f(-411.5f, 0.0f, 0.0f));
 }
 
@@ -59,10 +67,11 @@ Mat project_points(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat *imag
 	vector<Point2f> image_points;
 	vector<Point3f> posts;
 	
-	posts.push_back(Point3f(-137.2f, 0.0f, 1189.0f));
-	posts.push_back(Point3f(960.2f, 0.0f, 1189.0f));
-	posts.push_back(Point3f(-228.6f, 0.0f, 0.0f));
-	posts.push_back(Point3f(1051.6f, 0.0f, 0.0f));
+	posts.push_back(Point3f(-548.7f, 1189.0f, 0));
+	posts.push_back(Point3f(548.7f, 1189.0f, 0));
+	posts.push_back(Point3f(0.0f, 0.0f, 91.4f));
+//	posts.push_back(Point3f(-228.6f, 0.0f, 0.0f));
+//	posts.push_back(Point3f(1051.6f, 0.0f, 0.0f));
 	projectPoints(posts, _rvec, _tvec, _camera, _distorsion, image_points);	
 	//cout << "Projected points: " << image_points << endl;
 	if(image == NULL || (*image).empty())
