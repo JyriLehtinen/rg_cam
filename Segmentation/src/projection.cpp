@@ -118,27 +118,52 @@ int construct_transformation(Mat rvec, Mat tvec, Mat* dst)
 	return 0;
 }
 
+/*
+   @brief: Cut the edge out from the original video, leaving the court only
+   @param: _camera, the camera intrisic parameters matrix
+   @param: _distorsion, camera distorsion matrix
+   @param: _rvec, rotation matrix
+   @param: _tvec, translation matrix
+   @param: image, pointer to the image we're editing
+   @retval: Cropped image
+*/
 Mat crop_image(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat image)
 {
-
 	/* Our region of interest in the video is the original court,
 	   slightly extended on the sides and elevated to get the original net in the picture.
 	   The following points are just outside the (doubles) court lines
 	*/
+	Mat mask;
 
 	vector<Point2f> image_points;
-	vector<Point3f> world_edges;
+	vector<Point3f> world_corners;
+	vector< vector<Point2f> >  co_ordinates;
+	co_ordinates.push_back(vector<Point2f>());
 	
-	world_edges.push_back(Point3f(-648.7f, -1189.0f, 107.0f)); //"From bottom left corner of doubles, 1m to the left and 1,07cm up.
-	world_edges.push_back(Point3f(-648.7f, 1189.0f, 107.0f)); //"From upper left corner of doubles, 1m to the left and 1,07cm up.
-	world_edges.push_back(Point3f(648.7f, 1189.0f, 107.0f)); //"From upper right corner of doubles, 1m to the right and 1,07cm up.
-	world_edges.push_back(Point3f(648.7f, -1189.0f, 107.0f)); //"From bottom right corner of doubles, 1m to the right and 1,07cm up.
+	world_corners.push_back(Point3f(-648.7f, -1189.0f, 107.0f)); //"From bottom left corner of doubles, 1m to the left and 1,07cm up.
+	world_corners.push_back(Point3f(-648.7f, 1189.0f, 107.0f)); //"From upper left corner of doubles, 1m to the left and 1,07cm up.
+	world_corners.push_back(Point3f(648.7f, 1189.0f, 107.0f)); //"From upper right corner of doubles, 1m to the right and 1,07cm up.
+	world_corners.push_back(Point3f(648.7f, -1189.0f, 107.0f)); //"From bottom right corner of doubles, 1m to the right and 1,07cm up.
 
-	projectPoints(world_edges, _rvec, _tvec, _camera, _distorsion, image_points);	//Calculate where these points would be in the image
+	printf("\n\tNow projecting points...");
+	projectPoints(world_corners, _rvec, _tvec, _camera, _distorsion, image_points);	//Calculate where these points would be in the image TODO Check whether points are behind camera or not
+	printf("\tSuccessful!\n");
 
-	//Create a ROI from calculated points TODO drawContours to mask
+	/* Create lines between the corner points */
+	//for(int i=0; i<4; ++i)
+		co_ordinates.push_back(image_points);
+
+	printf("\n\tNow drawing contours...");
+	drawContours(mask,co_ordinates,0, Scalar(255),CV_FILLED, 8);
+	printf("\tDone!\n");
+
 	//Limit ROI to image max dimensions TODO Overlap of mask and rect(src.height, src, width) etc...
+	Rect ROI = Rect(0, 0, image.cols, image.rows);
+	mask = mask(ROI);
+
+	Mat out(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
+	image.copyTo(out, mask);
 	//Copy mask from the original image
 	//Return the cropped image
-	return image; //TODO: Return the cropped image instead of the original.
+	return image;
 }

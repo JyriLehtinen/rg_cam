@@ -1,7 +1,8 @@
 import bpy
 import math
 import mathutils
-import parser
+import blender_parser
+import numpy
 
 #This is the original function
 def _adjust_camera(camera_coordinates, target_coordinates, scene):
@@ -58,7 +59,11 @@ def capture_image(scene, path):
 
 def main_(string):
 
-	transformM = parser.get_transformation_matrix(string)
+#print("\n\n Now runnign Python. Input string is:")
+	string = string.decode("ascii")
+#	print(string)
+
+	transformM = blender_parser.get_transformation_matrix(string)
 
 	print("Transformation matrix:")
 	print(transformM)
@@ -72,9 +77,9 @@ def main_(string):
 	# Create scene
 	scene = bpy.data.scenes["Scene"]
 # Camera coordinates for testing
-	camera_location = parser.get_position(transformM)
+	camera_location = blender_parser.get_position(transformM)
 # Camera rotation angles
-	euler_angles = parser.get_euler_angles(transformM)
+	euler_angles = blender_parser.get_euler_angles(transformM)
 # Path to save rendered image in
 	image_path = 'render.jpg'
 
@@ -110,4 +115,9 @@ if __name__ == "__main__":
 	'''
 
 if __name__ == "__main__":
-	main_("[0.9996112060025656, 0.02751455566943147, 0.004515092514032283, 30.88144708139786;\n  -0.02727902114228923, 0.9985763003920589, -0.04583914594347553, 92.68978101851303;\n  -0.005769908111491143, 0.04569815665453551, 0.9989386300663132, 1793.480325390813;\n  0, 0, 0, 1]")
+#String 1 works, string2 is pointing the wrong way :S. String3 is guaranteed to be correct (confirmed with projected points)
+	string1 = "[0.9996112060025656, 0.02751455566943147, 0.004515092514032283, 30.88144708139786;\n  -0.02727902114228923, 0.9985763003920589, -0.04583914594347553, 92.68978101851303;\n  -0.005769908111491143, 0.04569815665453551, 0.9989386300663132, 1793.480325390813;\n  0, 0, 0, 1]"
+	string2 = "[0.9996986961845005, 0.0130851670752492, -0.02076764911159724, 36.46081826533477;\n-0.02016037088467908, -0.04494701163374253, -0.9987859258074215, 93.94122515404328;\n-0.01400272447782201, 0.9989036713056013, -0.04466966710631697, 1789.704853249201;\n0, 0, 0, 1]"
+	string3 = "[0.9997616610412324, 0.007676834817497862, -0.02043740001225704, 33.81603669101087;\n-0.02007781132739192, -0.04431193818091471, -0.9988159658450363, 94.30889610799368;\n-0.00857336598879369, 0.9989882473492048, -0.04414724287865042, 1779.905077115382;\n0, 0, 0, 1]"
+
+	main_(bytearray(string3, "ascii"))

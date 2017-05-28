@@ -76,32 +76,30 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
 		}
 		else
 		{
-			cout << "Solvin' 'n' shoite!" << endl;
-
             stringstream parsed;
 
 
 			if(	solvePnP(model_points, court_lines, camera_matrix, dist_coeffs, rvec, tvec, false, CV_ITERATIVE))
 			{
 
-				cout << "court solvePnP succeeded!" << endl;
-				cout << "rvec: " << rvec << endl <<  "tvec: " << tvec << endl;
+				cout << "\ncourt solvePnP succeeded!" << endl;
+				//cout << "rvec: " << rvec << endl <<  "tvec: " << tvec << endl;
 				Mat rotM;
 				Rodrigues(rvec, rotM);
-				cout << "Rotation matrix:" << endl << rotM << endl;
 				Mat transfM(4, 4, CV_64F);
 				construct_transformation(rvec, tvec, &transfM);
-//				cout << "Transformation matrix:" << endl << transfM << endl;
+				cout << "\n(OpenCV) Transformation matrix:" << endl << transfM << endl;
 
                 parsed << transfM;
 
                 char* tmp = (char*) malloc(parsed.str().size());
                 strcpy(tmp, parsed.str().c_str()); //This is disgusting
-                //cout << parsed.str() << endl;
-//                printf("\n\n%s\n\n", tmp);
+				//printf("\nThis should be a string now");
+                //printf("\n\n%s\n\n", tmp);
 
                 init_python_api(tmp);
-                free(tmp);
+
+                //free(tmp); //FIXME This causes a crash
 
 			}
                 
@@ -128,8 +126,6 @@ int main(int argc, const char** argv)
 {
     help();
 
-   // const char* data_to_python = "\n\n\t\t\tAWESOMESAUCE\n\n\n";
-//	init_python_api((char*)data_to_python);
 
     CommandLineParser parser(argc, argv, keys);
     bool useCamera = parser.has("camera");
@@ -279,6 +275,7 @@ int main(int argc, const char** argv)
 		}
 		if(!update_bg_model)
 			img = project_points(camera_matrix, dist_coeffs, rvec, tvec, &img);
+			//img = crop_image(camera_matrix, dist_coeffs, rvec, tvec, img);
 
         imshow("image", img);
         //imshow("foreground mask", fgmask);
@@ -290,7 +287,6 @@ int main(int argc, const char** argv)
         if( k == ' ' )
         {
             update_bg_model = !update_bg_model;
-			project_points(camera_matrix, dist_coeffs, rvec, tvec, &img);
 
             if(update_bg_model)
                 printf("Background update is on\n");

@@ -43,8 +43,8 @@ void init_python_api(char* parsed_data)
 	if(PyTuple_SetItem(pArgs, 0, pValue))
         printf("Tuple assignment fucked up :S\n");
     
-    printf("This is what I'm passing to python: %s\n", PyByteArray_AsString(pValue));
+    //printf("\n\nThis is what I'm passing to python: %s\n", PyByteArray_AsString(pValue));
 
 	if(!PyObject_Call(pFunc, pArgs, NULL))
-        printf("\nCalling failed\n");
+        printf("\n\t\t\tCalling python function failed\n");
 }

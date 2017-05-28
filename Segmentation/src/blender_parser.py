@@ -1,6 +1,7 @@
 import numpy
 import math
 
+
 def swap_cols(arr, frm, to):
     arr[:,[frm, to]] = arr[:,[to, frm]]
 
@@ -16,7 +17,7 @@ def get_transformation_matrix(string):
 
 def get_rotation_matrix(transformationM):
 	rotM = transformationM[0:3, 0:3]
-	swap_cols(rotM, 1, 2)
+#swap_cols(rotM, 1, 2)
 	return rotM
 
 def get_translation_vector(transformationM):
@@ -32,11 +33,14 @@ def get_position(transformationM):
 #Linear algebra: 0 = RC + T ==> C = -R^t * T
 	position = -(rotation.transpose() * translation)
 	position = numpy.squeeze(numpy.asarray(position))
-	position[2] = -position[2]
+#position[2] = position[2]
+	position[0] = -position[0]
 
 	for i in range(3):
 		position[i] /= 100.0
 
+	print("\nCamera position:")
+	print(position)
 	return position
 
 
@@ -47,14 +51,21 @@ def get_euler_angles(R) :
     singular = sy < 1e-6
  
     if  not singular :
+#Z and Y need to be swapped
         x = math.atan2(R[2,1] , R[2,2])
-        y = math.atan2(-R[2,0], sy)
-        z = math.atan2(R[1,0], R[0,0])
+        z = math.atan2(-R[2,0], sy)
+        y = math.atan2(R[1,0], R[0,0])
     else :
+#Z and Y need to be swapped
         x = math.atan2(-R[1,2], R[1,1])
-        y = math.atan2(-R[2,0], sy)
-        z = 0
- 
+        z = math.atan2(-R[2,0], sy)
+        y = 0
+
+    print("\nCamera euler angles")
+    print("xRad: %f, %f deg" % (x, x*180./math.pi))
+    print("yRad: %f, %f deg" % (y, y*180./math.pi))
+    print("zRad: %f, %f deg" % (z, z*180./math.pi))
+	
     return numpy.array([x, y, z])
 
 
