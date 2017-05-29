@@ -35,6 +35,8 @@ vector<Point3f> model_points;
 Mat tvec, rvec, camera_matrix, dist_coeffs;
 Mat bg_image;
 bool replacePic;
+Mat cropping_mask;
+Mat cropping_not;
 
 static void help()
 {
@@ -211,6 +213,7 @@ int main(int argc, const char** argv)
 
     Mat img0, img, fgmask, fgimg;
 	Mat bg_img0, bg_img, areas, blob_img;
+	Mat fg_crop;
 	
 	bool camera_calibrated = false;
 	
@@ -223,6 +226,10 @@ int main(int argc, const char** argv)
             break;
 
 		img = img0;
+
+		if(!cropping_not.empty())
+			img0.copyTo(fg_crop, cropping_not);
+
 		if(!camera_calibrated)
 		{
 			construct_camera(img, &camera_matrix, &dist_coeffs);
@@ -232,8 +239,11 @@ int main(int argc, const char** argv)
           fgimg.create(img.size(), img.type());
 
         //update the model
-		adjust_learning(fps, frm_cnt++, rate);
-        bg_model->apply(img, fgmask, update_bg_model ? *rate : 0); //-1 learning rate means automatic adjustment, 0.005 seemed good for the clip
+		//adjust_learning(fps, frm_cnt++, rate);
+		//TODO Don't filter the whole image, take the negative of the cropping mask
+		
+
+        bg_model->apply(fg_crop, fgmask, update_bg_model ? -1 : 0); //-1 learning rate means automatic adjustment, 0.005 seemed good for the clip
 
         if( smoothMask )
         {
@@ -266,9 +276,11 @@ int main(int argc, const char** argv)
 			bg_img.copyTo(fgimg);
 		
 
-		if(!update_bg_model)
+		//if(!update_bg_model)
 			//img = project_points(camera_matrix, dist_coeffs, rvec, tvec, &img);
-			fgmask = crop_image(camera_matrix, dist_coeffs, rvec, tvec, img);
+
+		if(!cropping_mask.empty())
+			img.copyTo(fgimg, cropping_mask);
 
         img.copyTo(fgimg, fgmask);
 
@@ -296,7 +308,9 @@ int main(int argc, const char** argv)
         if( k == 27 ) break;
         if( k == ' ' )
         {
-            update_bg_model = !update_bg_model;
+            //update_bg_model = !update_bg_model;
+			cropping_mask = crop_image(camera_matrix, dist_coeffs, rvec, tvec, img);
+			bitwise_not(cropping_mask, cropping_not);
 
             if(update_bg_model)
                 printf("Background update is on\n");
