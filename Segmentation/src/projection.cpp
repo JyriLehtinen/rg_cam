@@ -43,6 +43,7 @@ int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
     *matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
     *_dist_coeffs = Mat::zeros(4,1,DataType<double>::type); // Assuming no lens distortion
 */	
+	/*
 	// Values for Sony Xperia Z3 Compact, default horizontal video
 	*matrix = (Mat_<double>(3,3) <<
 			1.88389429e+03, 0.00000000e+00, 9.55374691e+02,
@@ -51,6 +52,16 @@ int construct_camera(Mat im, Mat *matrix, Mat *_dist_coeffs)
 			
 	*_dist_coeffs = (Mat_<double>(5,1) <<
 			-1.71533585e-01, 5.12063874e+00, 8.05474932e-05, -3.19247362e-03, -3.58186431e+01);
+	*/
+	
+	//Values for Logitech Live! Chat HD -Webcamera (RMS = 0.55607779207):
+	*matrix = (Mat_<double>(3,3) <<
+			1.14978204e+03, 0.00000000e+00, 6.73382667e+02,
+			0.00000000e+00, 1.15080886e+03, 3.00863716e+02,
+			0.00000000e+00, 0.00000000e+00, 1.00000000e+00);
+
+	*_dist_coeffs = (Mat_<double>(5, 1) <<
+			0.12454721, -0.95423951, -0.01841303,  0.00211118,  1.84403588);
 
 	cout << "Camera Matrix " << endl << *matrix << endl ;
 }

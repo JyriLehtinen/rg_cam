@@ -34,10 +34,10 @@ def get_position(transformationM):
 	position = -(rotation.transpose() * translation)
 	position = numpy.squeeze(numpy.asarray(position))
 #position[2] = position[2]
-	position[0] = -position[0]
+	position[0] = position[0]
 
 	for i in range(3):
-		position[i] /= 150.0
+		position[i] /= 140.0
 
 	print("\nCamera position:")
 	print(position)
@@ -63,6 +63,7 @@ def get_euler_angles(R) :
 
     y = -y
     x =  1.57079633 + (1.57079633 - x)
+    z = -z
 
     print("\nCamera euler angles")
     print("xRad: %f, %f deg" % (x, x*180./math.pi))
