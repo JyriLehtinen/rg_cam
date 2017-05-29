@@ -33,6 +33,8 @@ using namespace cv;
 vector<Point2f> court_lines;
 vector<Point3f> model_points;
 Mat tvec, rvec, camera_matrix, dist_coeffs;
+Mat bg_image;
+bool replacePic;
 
 static void help()
 {
@@ -98,6 +100,9 @@ void on_mouse( int e, int x, int y, int d, void *ptr )
                 //printf("\n\n%s\n\n", tmp);
 
                 init_python_api(tmp);
+				bg_image = imread("render.png", 1);
+				replacePic = true;
+
 
                 //free(tmp); //FIXME This causes a crash
 
@@ -130,7 +135,8 @@ int main(int argc, const char** argv)
     CommandLineParser parser(argc, argv, keys);
     bool useCamera = parser.has("camera");
     bool smoothMask = parser.has("smooth");
-	bool replacePic = parser.has("pic");
+	//bool replacePic = parser.has("pic");
+	replacePic = parser.has("pic");
 	bool replaceVid = parser.has("bg_vid");
 	bool detectContours = parser.has("contours");
 	bool detectBlobs = parser.has("blobs");
@@ -146,15 +152,15 @@ int main(int argc, const char** argv)
 	int fps;
 	long frm_cnt = 0;
 
-	Mat image;
+	//Mat image; //FIXME Now a global variable bg_image
 	VideoCapture bg_cap;
     bool update_bg_model = true;
 
 	if( replacePic )
 	{
 		printf("Background replacement active\n");
-		image = imread(picture,1);
-		if(image.empty())
+		bg_image = imread(picture,1);
+		if(bg_image.empty())
 		{
 			printf("Error reading image, seems empty :/ \n");
 			replacePic = false;
@@ -238,7 +244,7 @@ int main(int argc, const char** argv)
 
 		if(replacePic)
 		{
-			resize(image, bg_img, img0.size(), 0, 0, INTER_LINEAR);
+			resize(bg_image, bg_img, img0.size(), 0, 0, INTER_LINEAR);
 		}
 
 
@@ -255,8 +261,15 @@ int main(int argc, const char** argv)
 		}
 
         fgimg = Scalar::all(0);
+		
 		if(replacePic || replaceVid)
 			bg_img.copyTo(fgimg);
+		
+
+		if(!update_bg_model)
+			//img = project_points(camera_matrix, dist_coeffs, rvec, tvec, &img);
+			fgmask = crop_image(camera_matrix, dist_coeffs, rvec, tvec, img);
+
         img.copyTo(fgimg, fgmask);
 
         Mat bgimg;
@@ -273,9 +286,6 @@ int main(int argc, const char** argv)
 			blob_img = draw_blobs(fgmask);
 			imshow("Blobs", blob_img);
 		}
-		if(!update_bg_model)
-			img = project_points(camera_matrix, dist_coeffs, rvec, tvec, &img);
-			//img = crop_image(camera_matrix, dist_coeffs, rvec, tvec, img);
 
         imshow("image", img);
         //imshow("foreground mask", fgmask);

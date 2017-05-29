@@ -37,7 +37,7 @@ def get_position(transformationM):
 	position[0] = -position[0]
 
 	for i in range(3):
-		position[i] /= 100.0
+		position[i] /= 150.0
 
 	print("\nCamera position:")
 	print(position)
@@ -60,6 +60,9 @@ def get_euler_angles(R) :
         x = math.atan2(-R[1,2], R[1,1])
         z = math.atan2(-R[2,0], sy)
         y = 0
+
+    y = -y
+    x =  1.57079633 + (1.57079633 - x)
 
     print("\nCamera euler angles")
     print("xRad: %f, %f deg" % (x, x*180./math.pi))

@@ -57,8 +57,8 @@ int construct_transformation(Mat rvec, Mat tvec, Mat* dst);
    @param: _distorsion, camera distorsion matrix
    @param: _rvec, rotation matrix
    @param: _tvec, translation matrix
-   @param: image, pointer to the image we're editing
-   @retval: Cropped image
+   @param: image, the image we're editing
+   @retval: mask for cropping 
 */
 Mat crop_image(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat image);
 #endif //PROJECTION_H

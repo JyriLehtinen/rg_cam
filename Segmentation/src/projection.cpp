@@ -125,7 +125,7 @@ int construct_transformation(Mat rvec, Mat tvec, Mat* dst)
    @param: _rvec, rotation matrix
    @param: _tvec, translation matrix
    @param: image, pointer to the image we're editing
-   @retval: Cropped image
+   @retval: mask for cropping
 */
 Mat crop_image(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat image)
 {
@@ -133,37 +133,37 @@ Mat crop_image(Mat _camera, Mat _distorsion, Mat _rvec, Mat _tvec, Mat image)
 	   slightly extended on the sides and elevated to get the original net in the picture.
 	   The following points are just outside the (doubles) court lines
 	*/
-	Mat mask;
+	Mat mask(image.size(), CV_8U, Scalar(0)); 
 
 	vector<Point2f> image_points;
 	vector<Point3f> world_corners;
-	vector< vector<Point2f> >  co_ordinates;
-	co_ordinates.push_back(vector<Point2f>());
 	
-	world_corners.push_back(Point3f(-648.7f, -1189.0f, 107.0f)); //"From bottom left corner of doubles, 1m to the left and 1,07cm up.
-	world_corners.push_back(Point3f(-648.7f, 1189.0f, 107.0f)); //"From upper left corner of doubles, 1m to the left and 1,07cm up.
-	world_corners.push_back(Point3f(648.7f, 1189.0f, 107.0f)); //"From upper right corner of doubles, 1m to the right and 1,07cm up.
-	world_corners.push_back(Point3f(648.7f, -1189.0f, 107.0f)); //"From bottom right corner of doubles, 1m to the right and 1,07cm up.
+	world_corners.push_back(Point3f(-648.7f, 0, 30.0f)); //Left net post
+	world_corners.push_back(Point3f(-548.7f, 1189.0f, 60.0f)); //"From upper left corner of doubles, 0,5m up.
+	world_corners.push_back(Point3f(548.7f, 1189.0f, 60.0f)); //"From upper right corner of doubles, 0,5m up.
+	world_corners.push_back(Point3f(648.7f, 0, 30.0f)); //Right net post
 
-	printf("\n\tNow projecting points...");
 	projectPoints(world_corners, _rvec, _tvec, _camera, _distorsion, image_points);	//Calculate where these points would be in the image TODO Check whether points are behind camera or not
-	printf("\tSuccessful!\n");
+//cout << image_points << endl;
 
-	/* Create lines between the corner points */
-	//for(int i=0; i<4; ++i)
-		co_ordinates.push_back(image_points);
+	Point left_edge = Point(0, (image_points[1].y - ((image_points[1].y - image_points[0].y)/(image_points[1].x - image_points[0].x) * image_points[1].x)));
+	Point right_edge = Point(image.cols, ( image_points[2].y + (image_points[3].y - image_points[2].y)/(image_points[3].x - image_points[2].x) * (image.cols - image_points[2].x) ) ); 
 
-	printf("\n\tNow drawing contours...");
-	drawContours(mask,co_ordinates,0, Scalar(255),CV_FILLED, 8);
-	printf("\tDone!\n");
+	Point crop_points[1][6];
 
-	//Limit ROI to image max dimensions TODO Overlap of mask and rect(src.height, src, width) etc...
-	Rect ROI = Rect(0, 0, image.cols, image.rows);
-	mask = mask(ROI);
+	crop_points[0][0] = Point(0, image.rows); //Bottom left corner
+	crop_points[0][1] = Point(left_edge); //Left edge of the diagonal line
+	crop_points[0][2] = Point(image_points[1] ); //Upper left back corner 
+	crop_points[0][3] = Point(image_points[2] ); //Upper right back corner
+	crop_points[0][4] = Point(right_edge); //Right edge of the diagonal line
+	crop_points[0][5] = Point(image.cols, image.rows); //Bottom right corner
 
-	Mat out(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
-	image.copyTo(out, mask);
-	//Copy mask from the original image
-	//Return the cropped image
-	return image;
+	const Point* ppt[1] = { crop_points[0] };
+	int npt[] = { 6 };
+
+	fillPoly( mask, ppt, npt, 1, Scalar( 255, 255, 255 ), 8 );
+
+	
+	//Return the mask for the cutout
+	return mask;
 }
